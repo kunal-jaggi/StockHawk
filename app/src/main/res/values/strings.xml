@@ -10,4 +10,15 @@
   <string name="input_hint">FB</string>
   <string name="input_prefill"></string>
   <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+
+
+  <!-- Empty Stock Database -->
+  <string name="empty_stock_list">No stock Information Available</string>
+  <string name="empty_stock_list_no_network">No stock information available. The network is not available to fetch stock data.</string>
+  <string name="empty_stock_list_server_down">No stock information available. The server is not returning data.</string>
+  <string name="empty_stock_list_server_error">No stock information available. The server is not returning valid data. Please check for an updated version of StockHawk.</string>
+
+  <!-- Key name for storing stock status in SharedPreferences -->
+  <string name="pref_stock_status_key" translatable="false">stock-status</string>
+
 </resources>

@@ -3,13 +3,17 @@ package com.sam_chordas.android.stockhawk.service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
+import android.support.annotation.IntDef;
 import android.util.Log;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
@@ -18,6 +22,8 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URLEncoder;
 
 /**
@@ -32,6 +38,17 @@ public class StockTaskService extends GcmTaskService{
   private Context mContext;
   private StringBuilder mStoredSymbols = new StringBuilder();
   private boolean isUpdate;
+
+  @Retention(RetentionPolicy.SOURCE)
+  @IntDef({STOCK_STATUS_OK, STOCK_STATUS_SERVER_DOWN, STOCK_STATUS_SERVER_INVALID,  STOCK_STATUS_UNKNOWN})
+  public @interface StockStatus {}
+
+  public static final int STOCK_STATUS_OK = 0; //server response code 200
+  public static final int STOCK_STATUS_SERVER_DOWN = 1;  //server response code 404
+  public static final int STOCK_STATUS_SERVER_INVALID = 2; //server response code 500
+  public static final int STOCK_STATUS_UNKNOWN = 3;
+  public static final int STOCK_STATUS_INVALID = 4; //indicates user entered wrong symbol
+
 
   public StockTaskService(){}
 
@@ -57,6 +74,10 @@ public class StockTaskService extends GcmTaskService{
     try{
       // Base URL for the Yahoo query
       urlStringBuilder.append("https://query.yahooapis.com/v1/public/yql?q=");
+
+      //test for invalid result
+      //urlStringBuilder.append("http://google.com/?");
+
       urlStringBuilder.append(URLEncoder.encode("select * from yahoo.finance.quotes where symbol "
         + "in (", "UTF-8"));
     } catch (UnsupportedEncodingException e) {
@@ -126,12 +147,30 @@ public class StockTaskService extends GcmTaskService{
         }catch (RemoteException | OperationApplicationException e){
           Log.e(LOG_TAG, "Error applying batch insert", e);
         }
+
+        //if you got so far, response from server was OK!
+        setStockStatus(mContext,  STOCK_STATUS_OK);
+
       } catch (IOException e){
+        Log.d(LOG_TAG, "Exception caught: "+e);
         e.printStackTrace();
+        setStockStatus(mContext,  STOCK_STATUS_SERVER_INVALID);
       }
     }
 
     return result;
   }
+  /**
+   +     * Sets the location status into shared preference.  This function should not be called from
+   +     * the UI thread because it uses commit to write to the shared preferences.
+   +     * @param c Context to get the PreferenceManager from.
+   +     * @param locationStatus The IntDef value to set
+   +     */
+      static private void setStockStatus(Context c, @StockTaskService.StockStatus int locationStatus){
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+            SharedPreferences.Editor spe = sp.edit();
+            spe.putInt(c.getString(R.string.pref_stock_status_key), locationStatus);
+            spe.commit();
+        }
 
 }
