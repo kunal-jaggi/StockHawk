@@ -42,7 +42,15 @@ public class Utils {
                 if (count == 1) {
                     jsonObject = jsonObject.getJSONObject("results")
                             .getJSONObject("quote");
-                    batchOperations.add(buildBatchOperation(jsonObject));
+
+                    /*
+                    Implement check for null.
+                    */
+                    String ask= jsonObject.getString("Ask");
+                    Log.d(LOG_TAG, "Ask is: "+ ask);
+                    if(ask!=null && !ask.equalsIgnoreCase("null")) {
+                        batchOperations.add(buildBatchOperation(jsonObject));
+                    }
                 } else {
                     resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");
 
