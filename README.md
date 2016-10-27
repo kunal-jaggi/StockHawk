@@ -8,3 +8,5 @@ Fix: Inside the onLoadFinished callback, check to see if the cursor has 0 count.
 2. Handle null response from Yahoo Server
 App validates all input from servers and users. If data does not exist or is in the wrong format, the app logs this fact and does not crash.
 Fix is provided in Utils.java line number 51.
+
+
