@@ -60,7 +60,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     private Cursor mCursor;
     boolean isConnected;
 
-    private RecyclerView mRecyclerView;
+    private RecyclerView  mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
